@@ -16,6 +16,8 @@ _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 DATABASE = _DIR + '/new_database/Input/'
 PRE_DATA_PATH = DATABASE + 'Pre_data_input/'
 SUB_KPOINT_PATH = DATABASE + 'Sub_kpoint_input/'
+pre_prov = 'user_json_{}_{}.txt'
+skp_file = 'question_sub_kpoint_{}_{}.txt'
 
 
 def packFind_subkp(prov, PATH, pre_prov, datetime, skp_file):
@@ -54,8 +56,6 @@ def packFind_subkp(prov, PATH, pre_prov, datetime, skp_file):
 
 if __name__ == '__main__':
     datetimes = {'09-11'}
-    pre_prov = 'user_json_{}_{}.txt'
-    skp_file = 'question_sub_kpoint_{}_{}.txt'
 
     prov_set = getProvinceSet()
     # prov_set = {'全国'}
@@ -73,9 +73,7 @@ if __name__ == '__main__':
             pool.apply_async(packFind_subkp,kwds={
                 "prov":prov,
                 "PATH":PATH,
-                "pre_prov":pre_prov,
-                "datetime":datetime,
-                "skp_file":skp_file
+                "datetime":datetime
             })
 
     pool.close()
