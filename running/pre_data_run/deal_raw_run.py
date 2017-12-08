@@ -12,19 +12,13 @@ _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 DATABASE = _DIR + '/new_database/Input/'
 RAW_PATH = DATABASE + 'Raw_input/'
 PRE_DATA_PATH = DATABASE + 'Pre_data_input/'
-init_file = 'user_if_{}.csv'
-pre_province_file = 'user_json_{}_{}.csv'
-pre_province_txt = 'user_json_{}_{}.txt'
-datetime = '09-11'
 
-if __name__ == '__main__':
+
+def packRawdeal(datetime, init_file, pre_province_txt):
     province_set = {'nan', '0', '1', '2', '3', 'Rize', 'Juzny', 'hobbit', '全国', '台湾', 'NULL'}
     mkdir(PRE_DATA_PATH + datetime)
     PATH = PRE_DATA_PATH + datetime + '/'
     with open(RAW_PATH + init_file.format(datetime), 'r', encoding='utf-8') as raw_file:
-        # data = csv.reader(f)
-        # for d in data:
-        #     print(d)
         readers = csv.DictReader(raw_file)
         for reader in readers:
             prov = reader['province']
@@ -49,8 +43,16 @@ if __name__ == '__main__':
 
         raw_file.close()
 
+    # os.remove(RAW_PATH + init_file.format(datetime))
 
 
-
-
+if __name__ == '__main__':
+    datetime = '09-11'
+    init_file = 'user_if_{}.csv'
+    pre_province_txt = 'user_json_{}_{}.txt'
+    packRawdeal(
+        datetime=datetime,
+        init_file=init_file,
+        pre_province_txt=pre_province_txt
+    )
 
