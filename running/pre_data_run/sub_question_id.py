@@ -11,10 +11,7 @@ from lib.table_data import getQidSubj
 import logging
 
 
-datetime = '09-11'
-LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/anoah_Recom_user_{}.log'.format(datetime), filemode='a')
+
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
@@ -28,7 +25,7 @@ pre_province_file = 'user_json_{}_{}.txt'
 user_file =  'user_qid_subj_{}_{}_{}.txt'
 
 
-def packFind_subkp(prov, PATH, subj_set):
+def packFind_subkp(prov, PATH, subj_set, datetime):
     with open(PRE_DATA_PATH + datetime + '/' + pre_province_file.format(prov, datetime), 'r',
               encoding='utf-8') as pre_file:
         while True:
@@ -64,23 +61,32 @@ def packFind_subkp(prov, PATH, subj_set):
 
 
 if __name__ == '__main__':
-    prov_set = getProvinceSet()
-    # prov_set = {'北京'}
-    subj_set = {'2'}
-    pool = Pool(3)
-    for prov in prov_set:
-        PATH = USER_PATH + datetime + '/' + prov
-        mkdir(PATH)
-        logging.info("running the prov is: {}".format(prov))
-        for subj in subj_set:
-            if os.path.exists(PATH + '/' + user_file.format(prov, subj, datetime)):
-                os.remove(PATH + '/' + user_file.format(prov, subj, datetime))
+    datetimes = {'09-11'}
 
-        pool.apply_async(packFind_subkp,kwds={
-            "prov":prov,
-            "PATH":PATH,
-            "subj_set":subj_set
-        })
+    LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
+    prov_set = getProvinceSet()
+    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
+    # subj_set = {'2'}
+    pool = Pool(3)
+
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/Recom_subqid_{}.log'.format(datetime), filemode='a')
+
+        for prov in prov_set:
+            PATH = USER_PATH + datetime + '/' + prov
+            mkdir(PATH)
+            logging.info("running the {0} at the time between {1}".format(prov, datetime))
+            for subj in subj_set:
+                if os.path.exists(PATH + '/' + user_file.format(prov, subj, datetime)):
+                    os.remove(PATH + '/' + user_file.format(prov, subj, datetime))
+
+            pool.apply_async(packFind_subkp,kwds={
+                "prov":prov,
+                "PATH":PATH,
+                "subj_set":subj_set,
+                "datetime":datetime
+            })
 
     pool.close()
     pool.join()
