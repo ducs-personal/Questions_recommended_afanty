@@ -6,6 +6,7 @@ import time
 import json
 import pandas as pd
 from lib.util import getProvinceSet,mkdir
+from multiprocessing import Pool
 
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
@@ -47,12 +48,18 @@ def packRawdeal(datetime, init_file, pre_province_txt):
 
 
 if __name__ == '__main__':
-    datetime = '09-11'
+    datetimes = {'09-11'}
     init_file = 'user_if_{}.csv'
     pre_province_txt = 'user_json_{}_{}.txt'
-    packRawdeal(
-        datetime=datetime,
-        init_file=init_file,
-        pre_province_txt=pre_province_txt
-    )
+
+    pool = Pool(2)
+    for datetime in datetimes:
+        pool.apply_async(packRawdeal, kwds={
+            "datetime":datetime,
+            "init_file":init_file,
+            "pre_province_txt":pre_province_txt
+        })
+
+    pool.close()
+    pool.join()
 
