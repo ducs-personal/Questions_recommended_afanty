@@ -13,11 +13,6 @@ from collections import Counter
 import math
 from operator import itemgetter
 
-datetime = '09-11'
-LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/anoah_Analy_itemCF_{}.log'.format(datetime), filemode='a')
-
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
 ANALY = _DIR + '/new_database/Analy/'
@@ -121,35 +116,30 @@ def packageItemCFRun(prov, subj, datetime, ICF_PATH):
 
 
 if __name__ == '__main__':
-    # prov_set = getProvinceSet()
-    #'甘肃','宁夏','四川','全国','重庆','陕西','吉林','北京','海南','江苏','山东',
-    prov_set = {'湖北', '辽宁'}
+    datetimes = {'09-11'}
+
+    LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
+    prov_set = getProvinceSet()
     subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
     # subj_set = {'7'}
+    # prov_set = {'湖北', '辽宁'}
 
     pool = Pool(3)
-    for prov in prov_set:
-        ICF_PATH = ITEMCF_PATH + datetime + '/' + prov
-        mkdir(ICF_PATH)
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/anoah_Analy_itemCF_{}.log'.format(datetime), filemode='a')
 
-        for subj in subj_set:
-            pool.apply_async(packageItemCFRun,kwds={
-                'prov':prov,
-                'subj':subj,
-                'datetime':datetime,
-                'ICF_PATH':ICF_PATH
-            })
+        for prov in prov_set:
+            ICF_PATH = ITEMCF_PATH + datetime + '/' + prov
+            mkdir(ICF_PATH)
+
+            for subj in subj_set:
+                pool.apply_async(packageItemCFRun,kwds={
+                    'prov':prov,
+                    'subj':subj,
+                    'datetime':datetime,
+                    'ICF_PATH':ICF_PATH
+                })
+
     pool.close()
     pool.join()
-
-    # for prov in prov_set:
-    #     ICF_PATH = ITEMCF_PATH + datetime + '/' + prov
-    #     mkdir(ICF_PATH)
-    #
-    #     for subj in subj_set:
-    #                 packageItemCFRun(
-    #                     prov=prov,
-    #                     subj=subj,
-    #                     datetime=datetime,
-    #                     ICF_PATH=ICF_PATH
-    #                 )
