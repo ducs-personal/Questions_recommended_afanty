@@ -33,45 +33,63 @@ def dealJsonData(data_json):
     return data_json
 
 
-def getFreqItems(dataSet, k):
+def bigFreqItems(dataSet, minS_k):
     door_len = 0
-    #设置minSup，当大于10000时，赋值为90,；否则为（len()*0.007）
-    if len(str(len(dataSet))) > 4:
-        minSup = 100
+    minSup = 150
 
-        while door_len < 2500 and minSup > 4:
-            freqItems = []
-            freqlist = fpGrowth(dataSet, minSup=minSup)
+    while door_len < 5000 and minSup > minS_k:
+        freqItems = []
+        minSup = int(minSup * 0.95)
+        freqlist = fpGrowth(dataSet, minSup=minSup)
 
-            for i in freqlist:
-                # 当组合元素大于等于2个时，当内存够大时，可以提高此值
-                if len(i) >= k:
-                    freqItems.append(i)
-            del freqlist
-            door_len = len(freqItems)
+        for i in freqlist:
+            if len(i) >= 2:
+                freqItems.append(i)
+        del freqlist
+        door_len = len(freqItems)
 
-            minSup = int(minSup * 0.95)
-    else:
-        minSup = max(int(len(dataSet) * 0.007), 12)
+    if len(freqItems) > 9000:
+        freqItems = []
+        freqlist = fpGrowth(dataSet, minSup=minSup+1)
 
-        while door_len < 800 and minSup > 2:
-            freqItems = []
-            freqlist = fpGrowth(dataSet, minSup=minSup)
+        for i in freqlist:
+            if len(i) >= 2:
+                freqItems.append(i)
 
-            for i in freqlist:
-                # 当组合元素大于等于k个时，当内存够大时，可以提高此值
-                if len(i) >= k:
-                    freqItems.append(i)
-            del freqlist
-            door_len = len(freqItems)
+    return freqItems
 
-            minSup = int(minSup * 0.95)
 
-    if len(freqItems) < 50 and k > 2:
-        getFreqItems(dataSet=dataSet, k= k-1)
-    else:
-        return freqItems
+def smallFreqItems(dataSet, minS_k):
+    door_len = 0
+    minSup = 40
+    while door_len < 1000 and minSup > minS_k:
+        minSup = int(minSup * 0.95)
+        freqItems = []
+        freqlist = fpGrowth(dataSet, minSup=minSup)
 
+        for i in freqlist:
+            if len(i) >= 2:
+                freqItems.append(i)
+        del freqlist
+        door_len = len(freqItems)
+
+    if len(freqItems) < 30:
+        freqItems = []
+        freqlist = fpGrowth(dataSet, minSup=2)
+
+        for i in freqlist:
+            if len(i) >= 2:
+                freqItems.append(i)
+
+    if len(freqItems) > 6000:
+        freqItems = []
+        freqlist = fpGrowth(dataSet, minSup=minSup+1)
+
+        for i in freqlist:
+            if len(i) >= 2:
+                freqItems.append(i)
+
+    return freqItems
 
 
 def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
@@ -92,8 +110,12 @@ def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
             data_json = ps_file.readlines()
             data_json = dealJsonData(data_json)
 
-            freqItems = getFreqItems(data_json, 3)
-            # print(freqItems)
+            if os.path.getsize(exist_file) > 1500000:
+                freqItems = bigFreqItems(dataSet=data_json, minS_k=5)
+            else:
+                freqItems = smallFreqItems(dataSet=data_json, minS_k=3)
+
+            del data_json
             with open(output_file, 'wt') as csv_file:
                 for fi in freqItems:
                     csv_file.writelines('--'.join(i for i in fi))
@@ -106,21 +128,19 @@ def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
 
 if __name__ == '__main__':
     prov_set = getProvinceSet()
-    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
-    # prov_set = {'全国'}
-    # subj_set = {'3'}
+    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)} | {'52', '62'}
 
-    pool = Pool(2)
+    pool = Pool(3)
     for prov in prov_set:
         FO_PATH = FPGROWTH_PATH + datetime + '/' + prov
         mkdir(FO_PATH)
 
         for subj in subj_set:
             pool.apply_async(packageFPGrowthRun, kwds={
-                "prov":prov,
-                "subj":subj,
-                "datetime":datetime,
-                "FO_PATH":FO_PATH
+                "prov": prov,
+                "subj": subj,
+                "datetime": datetime,
+                "FO_PATH": FO_PATH
             })
 
     pool.close()
