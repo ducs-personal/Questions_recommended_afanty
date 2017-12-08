@@ -10,11 +10,6 @@ from multiprocessing import Pool
 from data_mining.FPGrowth import fpGrowth
 from lib.util import getProvinceSet,mkdir
 
-datetime = '09-11'
-LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/anoah_Analy_fpgrowth_{}.log'.format(datetime), filemode='a')
-
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
 ANALY = _DIR + '/new_database/Analy/'
@@ -80,12 +75,12 @@ def middleFreqItems(dataSet, minS_k):
 def smallFreqItems(dataSet, minS_k):
     door_len = 0
     minSup = 10
-    while door_len < 1000 and minSup > minS_k:
+    while door_len < 500 and minSup > minS_k:
         minSup = int(minSup * 0.95)
         getfreqitem(dataSet=dataSet, minS=minSup)
         door_len = len(freqItems)
 
-    if len(freqItems) > 4000:
+    if len(freqItems) > 2000:
         freqItems = getfreqitem(dataSet=dataSet, minS=minSup + 1)
 
     return freqItems
@@ -128,21 +123,28 @@ def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
 
 
 if __name__ == '__main__':
+    datetimes = {'09-11'}
+
+    LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
+    # prov_set = {'浙江'}
     subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)} | {'52', '62'}
 
     pool = Pool(3)
-    for prov in prov_set:
-        FO_PATH = FPGROWTH_PATH + datetime + '/' + prov
-        mkdir(FO_PATH)
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/Analy_fpgrowth_{}.log'.format(datetime), filemode='a')
+        for prov in prov_set:
+            FO_PATH = FPGROWTH_PATH + datetime + '/' + prov
+            mkdir(FO_PATH)
 
-        for subj in subj_set:
-            pool.apply_async(packageFPGrowthRun, kwds={
-                "prov": prov,
-                "subj": subj,
-                "datetime": datetime,
-                "FO_PATH": FO_PATH
-            })
+            for subj in subj_set:
+                pool.apply_async(packageFPGrowthRun, kwds={
+                    "prov": prov,
+                    "subj": subj,
+                    "datetime": datetime,
+                    "FO_PATH": FO_PATH
+                })
 
     pool.close()
     pool.join()
