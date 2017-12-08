@@ -11,11 +11,7 @@ import csv
 import json
 from operator import itemgetter
 
-datetime = '09-11'
 LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/Recom_itemCF_{}.log'.format(datetime), filemode='a')
-
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 RECOMMEND = _DIR + '/new_database/Recommend/'
 ANALY = _DIR + '/new_database/Analy/'
@@ -24,13 +20,14 @@ USER_PATH = RECOMMEND + 'user/'
 RECOM_ITEMCF_PATH = RECOMMEND + 'Item_colf/'
 
 itemCF_file = 'item_colf_{}_{}_{}.txt'
+output_file = 'itemCF_output_{}_{}.csv'
 
 
-def packageRcomItemCF(requir_user_file, diff, output_file):
+def packageRcomItemCF(req_user, diff, datetime):
     ''' 对推荐试题结果程序进行封装打包
-                                @param requir_user_file     原始数据文件(user_id, province， question)
-                                @param diff                 难度系数，int
-                                @param output_file          输出文件名
+                                @param req_user     原始数据文件(user_id, province， question)
+                                @param diff         难度系数，int
+                                @param datetime     时间区间
                             '''
     prov_set = getProvinceSet()
     diff = diff or 1
@@ -39,7 +36,7 @@ def packageRcomItemCF(requir_user_file, diff, output_file):
     if os.path.exists(filename):
         os.remove(filename)
 
-    with open(USER_PATH + requir_user_file, 'r') as user_file:
+    with open(USER_PATH + req_user, 'r') as user_file:
         readers = csv.DictReader(user_file)
         for reader in readers:
             prov = reader['province'][:2]
@@ -113,11 +110,16 @@ def packageRcomItemCF(requir_user_file, diff, output_file):
 
 
 if __name__ == '__main__':
-    requir_user_file = 'requir_user.csv'
-    output_file = 'itemCF_output_{}_{}.csv'
+    diff = 1
+    datetimes = {'09-11'}
+    req_user = 'requir_user.csv'
 
-    packageRcomItemCF(
-        requir_user_file=requir_user_file,
-        output_file=output_file,
-        diff=1
-    )
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/Recom_itemCF_{}.log'.format(datetime), filemode='a')
+
+        packageRcomItemCF(
+            diff=diff,
+            req_user=req_user,
+            datetime=datetime
+        )
