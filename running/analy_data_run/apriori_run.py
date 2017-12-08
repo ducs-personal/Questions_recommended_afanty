@@ -11,11 +11,6 @@ from data_mining.Apriori import find_rule,aprioriDataTrans
 from lib.util import getProvinceSet,mkdir
 from data_mining.Kmodes_Simhash import K_Simhash
 
-datetime = '09-11'
-LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/Analy_apriori_{}.log'.format(datetime), filemode='a')
-
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
 ANALY = _DIR + '/new_database/Analy/'
@@ -109,9 +104,6 @@ def packageWhileAprioriRun(prov, subj, support, confidence, datetime, AO_PATH):
 
             flag = 0
             while True:
-
-                print(flag)
-
                 apriori_all = find_rule(data_frame, support, confidence, ms='--')
                 if len(apriori_all) > 300:
                     output_file = AO_PATH + '/' + apriori_output_file.format(prov, subj, datetime)
@@ -129,40 +121,33 @@ def packageWhileAprioriRun(prov, subj, support, confidence, datetime, AO_PATH):
 
 
 if __name__ == '__main__':
-    #prov_set = getProvinceSet()
-    # , '甘肃', '宁夏', '四川', '全国', '重庆', '陕西', '吉林', '北京', '海南'
-    prov_set = {'江苏'}
-    support = 0.03
-    confidence = 0.10
-    # subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
-    subj_set = {'5'}
-    for prov in prov_set:
-        AO_PATH = APRIORI_PATH + datetime + '/' + prov
-        mkdir(AO_PATH)
+    datetimes= {'09-11'}
+    support = 0.20
+    confidence = 0.30
 
-        for subj in subj_set:
-            packageWhileAprioriRun(
-                prov=prov,
-                subj=subj,
-                support=support,
-                confidence=confidence,
-                datetime=datetime,
-                AO_PATH=AO_PATH
-            )
+    LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
+    prov_set = getProvinceSet()
+    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(
+        21, 31)} | {str(j) for j in range(41, 51)} | {'52', '62'}
 
-    # pool = Pool()
-    # for prov in prov_set:
-    #     AO_PATH = APRIORI_PATH + datetime + '/' + prov
-    #     mkdir(AO_PATH)
-    #     for subj in subj_set:
-    #         pool.apply_async(packageAprioriRun, kwds={
-    #             'prov': prov,
-    #             'subj': subj,
-    #             'support': support,
-    #             'confidence': confidence,
-    #             'datetime': datetime,
-    #             'AO_PATH': AO_PATH
-    #         })
-    #
-    # pool.close()
-    # pool.join()
+    pool = Pool(2)
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/Analy_apriori_{}.log'.format(datetime), filemode='a')
+
+        for prov in prov_set:
+            AO_PATH = APRIORI_PATH + datetime + '/' + prov
+            mkdir(AO_PATH)
+            for subj in subj_set:
+                pool.apply_async(packageAprioriRun, kwds={
+                    'prov': prov,
+                    'subj': subj,
+                    'support': support,
+                    'confidence': confidence,
+                    'datetime': datetime,
+                    'AO_PATH': AO_PATH
+                })
+                logging.info("{0}省，年级学科{1}，在区间{2}已完成Apriori算法".format(prov,subj,datetime))
+
+    pool.close()
+    pool.join()
