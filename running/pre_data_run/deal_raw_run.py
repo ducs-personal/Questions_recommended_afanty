@@ -13,9 +13,10 @@ _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 DATABASE = _DIR + '/new_database/Input/'
 RAW_PATH = DATABASE + 'Raw_input/'
 PRE_DATA_PATH = DATABASE + 'Pre_data_input/'
+pre_province_txt = 'user_json_{}_{}.txt'
 
 
-def packRawdeal(datetime, init_file, pre_province_txt):
+def packRawdeal(datetime, init_file):
     province_set = {'nan', '0', '1', '2', '3', 'Rize', 'Juzny', 'hobbit', '全国', '台湾', 'NULL'}
     mkdir(PRE_DATA_PATH + datetime)
     PATH = PRE_DATA_PATH + datetime + '/'
@@ -50,14 +51,12 @@ def packRawdeal(datetime, init_file, pre_province_txt):
 if __name__ == '__main__':
     datetimes = {'09-11'}
     init_file = 'user_if_{}.csv'
-    pre_province_txt = 'user_json_{}_{}.txt'
 
     pool = Pool(2)
     for datetime in datetimes:
         pool.apply_async(packRawdeal, kwds={
             "datetime":datetime,
-            "init_file":init_file,
-            "pre_province_txt":pre_province_txt
+            "init_file":init_file
         })
 
     pool.close()
