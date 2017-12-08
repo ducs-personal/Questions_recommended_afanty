@@ -11,11 +11,7 @@ import csv
 import json
 from operator import itemgetter
 from running.Recom_data_run.recom_fpg_run import getRecomFPGth
-
-datetime = '09-11'
-LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/Rec_iCF_fpg_{}.log'.format(datetime), filemode='a')
+from multiprocessing import Pool
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 RECOMMEND = _DIR + '/new_database/Recommend/'
@@ -30,13 +26,14 @@ RECOM_FPGTH_PATH = RECOMMEND + 'FPGrowth/'
 
 itemCF_file = 'item_colf_{}_{}_{}.txt'
 fpgth_output_file = 'fp_growth_{}_{}_{}.txt'
+output_file = 'output_{}_{}.csv'
 
 
-def packageRcomItemCF(requir_user_file, diff, output_file):
+def packageRcomItemCF(req_user, diff, datetime):
     ''' 对推荐试题结果程序进行封装打包
-                                @param requir_user_file     原始数据文件(user_id, province， question)
-                                @param diff                 难度系数，int
-                                @param output_file          输出文件名
+                                @param req_user     原始数据文件(user_id, province， question)
+                                @param diff         难度系数，int
+                                @param datetime     时间区间
                             '''
     prov_set = getProvinceSet()
     diff = diff or 1
@@ -45,7 +42,8 @@ def packageRcomItemCF(requir_user_file, diff, output_file):
     if os.path.exists(filename):
         os.remove(filename)
 
-    with open(USER_PATH + requir_user_file, 'r', encoding='gbk') as user_file:
+
+    with open(USER_PATH + req_user, 'r', encoding='gbk') as user_file:
         readers = csv.DictReader(user_file)
         for reader in readers:
             prov = reader['province'][:2]
@@ -76,7 +74,7 @@ def packageRcomItemCF(requir_user_file, diff, output_file):
                     fpg_file = FPGTH_PATH + datetime + '/' + prov + '/' + fpgth_output_file.format(prov,
                                                                                                    ks,datetime)
                     if os.path.exists(itemcf_file) or os.path.exists(fpg_file):
-                        logging.info(u"正在读取{0}省份年級学科{1}下的Analy下的ItemCF数据！".format(prov, ks))
+                        logging.info("正在读取{0}省份年級学科{1}下的Analy下的ItemCF数据！".format(prov, ks))
                         recom_set_itemCF = set([])
                         recom_set_fpg = set([])
 
@@ -98,7 +96,7 @@ def packageRcomItemCF(requir_user_file, diff, output_file):
                                     break
                             recom_file.close()
 
-                        logging.info(u"正在读取{0}省份年级学科{1}下的Analy下的FPGrowth数据！".format(prov, ks))
+                        logging.info("正在读取{0}省份年级学科{1}下的Analy下的FPGrowth数据！".format(prov, ks))
                         with open(fpg_file, 'r') as recom_file:
                             while True:
                                 result = recom_file.readline()
@@ -113,46 +111,61 @@ def packageRcomItemCF(requir_user_file, diff, output_file):
                             recom_set = recom_set_fpg or recom_set_itemCF
 
                             if len(recom_set) == 0:
-                                logging.info(u"用户{0},在年级科目{1}下没有通过FPGrowth和ItemCF得到推荐结果！".format(
-                                    user_id, ks))
+                                logging.info(
+                                    "用户{0},在年级科目{1}下没有通过FPGrowth和ItemCF得到推荐结果！".format(user_id, ks))
                                 recom_set = set(vs)
 
                         else:
                             recom_set = recom_set_fpg & recom_set_itemCF
 
                             if len(recom_set) <= len(set(vs)):
-                                logging.info(u"用户{0}，在年级科目{1}下，取并集没有达到一定数量！".format(
-                                    user_id, ks))
+                                logging.info(
+                                    "用户{0}，在年级科目{1}下，取并集没有达到一定数量！".format(user_id, ks))
                                 recom_set = recom_set_itemCF or recom_set_fpg
 
+                        # print(user_id, recom_set)
                         recom_list = getQuestionId(
                             table='question_simhash_20171111',
                             question_id=question_id,
                             recom_set=recom_set,
                             diff=diff
                         )
+                        # print(user_id, recom_list)
 
                         with open(filename, 'a') as csvfile:
                             writer = csv.writer(csvfile)
                             writer.writerow([user_id, ks, recom_list])
 
-                        logging.info(u"已经解析完用户{}！".format(user_id))
+                        logging.info("已经解析完用户{}！".format(user_id))
 
                     else:
-                        logging.error(u"用户{0}在年级科目{1}下没有查询到ItemCF和FPGrowth输出表".format(user_id, ks))
+                        logging.error(
+                            "用户{0}在年级科目{1}下没有查询到ItemCF和FPGrowth输出表".format(user_id, ks))
 
             else:
-                logging.error(u"用户{}传入的question_id在表question_simhash_20171111里查询不到！".format(user_id))
+                logging.error(
+                    "用户{}传入的question_id在表question_simhash_20171111里查询不到！".format(user_id))
 
         user_file.close()
 
 
 if __name__ == '__main__':
-    requir_user_file = 'requir_user.csv'
-    output_file = 'output_{}_{}.csv'
+    req_user = 'requir_user.csv'
+    datetimes = {'09-11'}
+    diff = 1
 
-    packageRcomItemCF(
-        requir_user_file=requir_user_file,
-        output_file=output_file,
-        diff=1
-    )
+    LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
+    pool = Pool(3)
+
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/Rec_iCF_fpg_{}.log'.format(datetime), filemode='a')
+
+        pool.apply_async(packageRcomItemCF, kwds={
+            "diff":diff,
+            "datetime":datetime,
+            "req_user":req_user
+        })
+
+    pool.close()
+    pool.join()
