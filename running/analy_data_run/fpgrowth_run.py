@@ -33,6 +33,17 @@ def dealJsonData(data_json):
     return data_json
 
 
+def getfreqitem(dataSet, minS):
+    freqItems = []
+    freqlist = fpGrowth(dataSet, minSup=minS)
+
+    for i in freqlist:
+        if len(i) >= 2:
+            freqItems.append(i)
+
+    return freqItems
+
+
 def bigFreqItems(dataSet, minS_k):
     door_len = 0
     minSup = 150
@@ -40,54 +51,42 @@ def bigFreqItems(dataSet, minS_k):
     while door_len < 5000 and minSup > minS_k:
         freqItems = []
         minSup = int(minSup * 0.95)
-        freqlist = fpGrowth(dataSet, minSup=minSup)
-
-        for i in freqlist:
-            if len(i) >= 2:
-                freqItems.append(i)
-        del freqlist
+        freqItems = getfreqitem(dataSet=dataSet, minS=minSup)
         door_len = len(freqItems)
 
     if len(freqItems) > 9000:
-        freqItems = []
-        freqlist = fpGrowth(dataSet, minSup=minSup+1)
+        freqItems = getfreqitem(dataSet=dataSet, minS=minSup + 1)
 
-        for i in freqlist:
-            if len(i) >= 2:
-                freqItems.append(i)
+    return freqItems
+
+
+def middleFreqItems(dataSet, minS_k):
+    door_len = 0
+    minSup = 40
+    while door_len < 1000 and minSup > minS_k:
+        minSup = int(minSup * 0.95)
+        freqItems = getfreqitem(dataSet=dataSet, minS=minSup)
+        door_len = len(freqItems)
+
+    if len(freqItems) < 30:
+        freqItems = getfreqitem(dataSet=dataSet, minS=2)
+
+    if len(freqItems) > 6000:
+        freqItems = getfreqitem(dataSet=dataSet, minS=minSup + 1)
 
     return freqItems
 
 
 def smallFreqItems(dataSet, minS_k):
     door_len = 0
-    minSup = 40
+    minSup = 10
     while door_len < 1000 and minSup > minS_k:
         minSup = int(minSup * 0.95)
-        freqItems = []
-        freqlist = fpGrowth(dataSet, minSup=minSup)
-
-        for i in freqlist:
-            if len(i) >= 2:
-                freqItems.append(i)
-        del freqlist
+        getfreqitem(dataSet=dataSet, minS=minSup)
         door_len = len(freqItems)
 
-    if len(freqItems) < 30:
-        freqItems = []
-        freqlist = fpGrowth(dataSet, minSup=2)
-
-        for i in freqlist:
-            if len(i) >= 2:
-                freqItems.append(i)
-
-    if len(freqItems) > 6000:
-        freqItems = []
-        freqlist = fpGrowth(dataSet, minSup=minSup+1)
-
-        for i in freqlist:
-            if len(i) >= 2:
-                freqItems.append(i)
+    if len(freqItems) > 4000:
+        freqItems = getfreqitem(dataSet=dataSet, minS=minSup + 1)
 
     return freqItems
 
@@ -110,10 +109,12 @@ def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
             data_json = ps_file.readlines()
             data_json = dealJsonData(data_json)
 
-            if os.path.getsize(exist_file) > 1500000:
+            if os.path.getsize(exist_file) > 2000000:
                 freqItems = bigFreqItems(dataSet=data_json, minS_k=5)
+            elif os.path.getsize(exist_file) < 200000:
+                freqItems = smallFreqItems(dataSet=data_json, minS_k=1)
             else:
-                freqItems = smallFreqItems(dataSet=data_json, minS_k=3)
+                freqItems = middleFreqItems(dataSet=data_json, minS_k=3)
 
             del data_json
             with open(output_file, 'wt') as csv_file:
