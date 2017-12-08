@@ -10,11 +10,7 @@ import pandas as pd
 import csv
 import json
 
-datetime = '09-11'
 LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/Recom_fpg_{}.log'.format(datetime), filemode='a')
-
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 RECOMMEND = _DIR + '/new_database/Recommend/'
 ANALY = _DIR + '/new_database/Analy/'
@@ -23,6 +19,7 @@ USER_PATH = RECOMMEND + 'user/'
 RECOM_FPGTH_PATH = RECOMMEND + 'FPGrowth/'
 
 fpgth_output_file = 'fp_growth_{}_{}_{}.txt'
+output_file = 'fp_output_{}_{}.csv'
 
 
 #获取推荐question_id
@@ -40,11 +37,11 @@ def getRecomFPGth(fpg_list, subkp_set):
         return subkp_str
 
 
-def packageRcomFPGth(requir_user_file, output_file, diff):
+def packageRcomFPGth(req_user, datetime, diff):
     ''' 对推荐试题结果程序进行封装打包
-                                @param requir_user_file     原始数据文件(user_id, province， question)
-                                @param diff                 难度系数，int
-                                @param output_file          输出文件名
+                                @param req_user     原始数据文件(user_id, province， question)
+                                @param diff         难度系数，int
+                                @param datetime     时间区间
                             '''
     prov_set = getProvinceSet()
     diff = diff or 1
@@ -53,7 +50,7 @@ def packageRcomFPGth(requir_user_file, output_file, diff):
     if os.path.exists(filename):
         os.remove(filename)
 
-    with open(USER_PATH + requir_user_file, 'r') as user_file:
+    with open(USER_PATH + req_user, 'r') as user_file:
         readers = csv.DictReader(user_file)
         for reader in readers:
             prov = reader['province'][:2]
@@ -115,16 +112,17 @@ def packageRcomFPGth(requir_user_file, output_file, diff):
 
 
 if __name__ == '__main__':
-    # prov_set = getProvinceSet()
-    # subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
-    # prov_set = {'福建'}
-    # subj_set = {'2'}
-    requir_user_file = 'requir_user.csv'
-    output_file = 'fp_output_{}_{}.csv'
+    datetimes = {'09-11'}
+    diff = 1
+    req_user = 'requir_user.csv'
 
-    packageRcomFPGth(
-        requir_user_file=requir_user_file,
-        output_file=output_file,
-        diff=1
-    )
+    for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                        filename='working/Recom_fpg_{}.log'.format(datetime), filemode='a')
+
+        packageRcomFPGth(
+            diff=diff,
+            datetime=datetime,
+            req_user=req_user
+        )
 
