@@ -10,11 +10,7 @@ from lib.util import mkdir,getProvinceSet
 from lib.table_data import tableToJson
 import logging
 
-
-
 LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
-                    filename='working/LYF_find_subkp.log', filemode='a')
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
@@ -66,8 +62,11 @@ if __name__ == '__main__':
     pool = Pool(3)
 
     for datetime in datetimes:
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
+                            filename='working/find_subkp_{}.log'.format(datetime), filemode='a')
         mkdir(SUB_KPOINT_PATH + datetime)
         PATH = SUB_KPOINT_PATH + datetime + '/'
+
         for prov in prov_set:
             logging.info("running the prov is: {}".format(prov))
 
