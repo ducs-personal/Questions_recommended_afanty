@@ -131,7 +131,7 @@ def getQuestionId(table, recom_set, diff, question_id):
     for n,recom in enumerate(recom_set):
         if recom is not None:
             flag = 2
-            while flag > 0:
+            while flag >= 0:
                 subj_kp_diff = recom + str(difficulty)
                 sql = "select question_id,knowledge_point from {0} where sub_kpoint_diff = '{1}' ".format(table, subj_kp_diff)
                 cur.execute(sql)
