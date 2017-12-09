@@ -1,9 +1,6 @@
 # -*-coding:utf8-*-
 import os
 import sys
-# -*-coding:utf8-*-
-import os
-import sys
 import csv
 import logging
 import pandas as pd
