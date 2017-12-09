@@ -10,14 +10,11 @@ from lib.util import mkdir,getProvinceSet
 from lib.table_data import getQidSubj
 import logging
 
-
-
-
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
 RECOMMEND = _DIR + '/new_database/Recommend/'
 
-USER_PATH = RECOMMEND + 'user/'
+RAW_PATH = RECOMMEND + 'Raw_input/'
 PRE_DATA_PATH = DATABASE + 'Pre_data_input/'
 SUB_KPOINT_PATH = DATABASE + 'Sub_kpoint_input/'
 
@@ -74,7 +71,7 @@ if __name__ == '__main__':
                             filename='working/Recom_subqid_{}.log'.format(datetime), filemode='a')
 
         for prov in prov_set:
-            PATH = USER_PATH + datetime + '/' + prov
+            PATH = RAW_PATH + datetime + '/' + prov
             mkdir(PATH)
             logging.info("running the {0} at the time between {1}".format(prov, datetime))
             for subj in subj_set:
