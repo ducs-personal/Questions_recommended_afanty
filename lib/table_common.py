@@ -31,8 +31,8 @@ async def main_tasks(tasks):
     return await asyncio.gather(*tasks)
 
 
-def getKpointSubj(table, question_id):
-    ''' 通过question_id获取字段knowledfe_point
+def getSubjKpoint(table, question_id):
+    ''' 通过question_id获取字段knowledge_point
                             @param table            table表
                             @param question_id      包含question_id的list
                         '''
