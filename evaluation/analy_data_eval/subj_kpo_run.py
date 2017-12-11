@@ -13,10 +13,10 @@ from lib.table_common import getSubjKpoint
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
-EVALUTE = _DIR + '/new_database/Analy/'
+EVALUATE = _DIR + '/new_database/Evaluate/'
 
 PRE_DATA_PATH = DATABASE + 'Pre_data_input/'
-SUBJ_KPO_PATH = EVALUTE + 'Subj_Kpo_output/'
+SUBJ_KPO_PATH = EVALUATE + 'Subj_Kpo_output/'
 
 pre_province_file = 'user_json_{}_{}.txt'
 output_file = 'subj_kpo_{}_{}_{}.txt'
