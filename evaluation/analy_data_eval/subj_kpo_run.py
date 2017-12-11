@@ -9,7 +9,7 @@ import json
 from multiprocessing import Pool
 from data_mining.FPGrowth import fpGrowth
 from lib.util import getProvinceSet,mkdir
-from lib.table_common import getSubjKpoint
+from lib.table_evaluat import getSubjKpoint
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
