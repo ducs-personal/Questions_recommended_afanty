@@ -47,16 +47,15 @@ def itemSimilarity(train_dict):
     for user, items_weight in train_dict.items():
         for id1,count1 in items_weight:
             if id1 not in item_count:
-                item_count[id1] = count1
-            else:
-                item_count[id1] += count1
+                item_count[id1] = 0
+            item_count[id1] += count1
             for id2,count2 in items_weight:
                 if id1 == id2:
                     continue
                 if id1 not in item_item_count:
                     item_item_count[id1] = dict()
                 if id2 not in item_item_count[id1]:
-                    item_item_count[id1][id2] = count1 + count2
+                    item_item_count[id1][id2] = 0
                 item_item_count[id1][id2] += count1 +count2
 
     UserSimi2arr = dict()
