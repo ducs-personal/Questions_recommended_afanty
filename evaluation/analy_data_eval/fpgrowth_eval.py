@@ -28,7 +28,7 @@ fpgth_output_file = 'fpgrowth_{}_{}_{}.txt'
 def dealJsonData(data_json):
     data_list = []
     for i in range(len(data_json)):
-        data = list(set(eval(data_json[i].replace('\n',''))[1:]))
+        data = list(set(eval(data_json[i].replace('\n',''))))
         if len(data) > 2:
             data_list.append(data)
 
