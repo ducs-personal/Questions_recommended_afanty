@@ -48,7 +48,8 @@ def itemSimilarity(train_dict):
         for id1,count1 in items_weight:
             if id1 not in item_count:
                 item_count[id1] = count1
-            item_count[id1] += count1
+            else:
+                item_count[id1] += count1
             for id2,count2 in items_weight:
                 if id1 == id2:
                     continue
