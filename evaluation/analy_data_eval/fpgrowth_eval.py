@@ -50,14 +50,17 @@ def bigFreqItems(dataSet, minS_k, getsize):
     door_len = 0
     minSup = int(3 * getsize / 10000)
 
-    while door_len < 3000 and minSup > minS_k:
+    while door_len < 4000 and minSup > minS_k:
         freqItems = []
         minSup = int(minSup * 0.95)
         freqItems = getfreqitem(dataSet=dataSet, minS=minSup, k=3)
         door_len = len(freqItems)
 
     if len(freqItems) > 10000:
-        freqItems = getfreqitem(dataSet=dataSet, minS=minSup + 1, k=3)
+        if minSup != int(minSup * 1.06):
+            freqItems = getfreqitem(dataSet=dataSet, minS=int(minSup * 1.06), k=3)
+        else:
+            freqItems = getfreqitem(dataSet=dataSet, minS=minSup + 1, k=3)
 
     return freqItems
 
@@ -113,11 +116,11 @@ def packageFPGrowthEval(prov, subj, datetime, FO_PATH):
             exist_file_size = os.path.getsize(exist_file)
 
             if  exist_file_size > 1000000:
-                freqItems = bigFreqItems(dataSet=data_json, minS_k=10, getsize=exist_file_size)
+                freqItems = bigFreqItems(dataSet=data_json, minS_k=8, getsize=exist_file_size)
             elif exist_file_size < 200000:
                 freqItems = smallFreqItems(dataSet=data_json, minS_k=2)
             else:
-                freqItems = middleFreqItems(dataSet=data_json, minS_k=7)
+                freqItems = middleFreqItems(dataSet=data_json, minS_k=5)
 
             del data_json
             if len(freqItems) > 0:
@@ -130,13 +133,12 @@ def packageFPGrowthEval(prov, subj, datetime, FO_PATH):
             ps_file.close()
 
 
-
 if __name__ == '__main__':
     datetimes = {'09-11'}
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
-    # prov_set = {'北京'}
+    # prov_set = {'山东'}
     subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)} | {
     '52', '62'}
 
