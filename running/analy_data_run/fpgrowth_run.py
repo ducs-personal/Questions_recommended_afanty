@@ -77,7 +77,7 @@ def smallFreqItems(dataSet, minS_k):
     minSup = 10
     while door_len < 500 and minSup > minS_k:
         minSup = int(minSup * 0.95)
-        getfreqitem(dataSet=dataSet, minS=minSup)
+        freqItems = getfreqitem(dataSet=dataSet, minS=minSup)
         door_len = len(freqItems)
 
     if len(freqItems) > 2000:
@@ -87,7 +87,7 @@ def smallFreqItems(dataSet, minS_k):
 
 
 def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
-    ''' 普通过程的Apriori打包程序
+    ''' 普通过程的fpgrowth打包程序
                                 @param prov         省份
                                 @param subj         年级学科
                                 @param FO_PATH      FPGrowth算法输出路径
