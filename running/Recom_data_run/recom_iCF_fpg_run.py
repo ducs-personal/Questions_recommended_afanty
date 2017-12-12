@@ -71,7 +71,7 @@ def readAnaFpg(ana_fpg, vs, recom_set_fpg):
 # 结合item_cf和FPGrowth两种推荐算法结果进行推荐
 def getRecomSet(recom_set_itemCF, recom_set_fpg, recom_set, vs):
     if len(recom_set_itemCF) == 0 or len(recom_set_fpg) == 0:
-        recom_set = recom_set_fpg or recom_set_itemCF
+        recom_set = recom_set_fpg | recom_set_itemCF
 
         if len(recom_set) == 0:
             recom_set = set(vs)
@@ -80,7 +80,7 @@ def getRecomSet(recom_set_itemCF, recom_set_fpg, recom_set, vs):
         recom_set = recom_set_fpg & recom_set_itemCF
 
         if len(recom_set) <= len(set(vs)):
-            recom_set = recom_set_itemCF or recom_set_fpg
+            recom_set = recom_set_itemCF | recom_set_fpg
 
     return recom_set
 
