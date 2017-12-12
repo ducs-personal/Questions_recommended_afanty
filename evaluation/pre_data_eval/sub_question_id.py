@@ -30,6 +30,7 @@ def packFind_subkp(prov, PATH, subj_set, datetime):
                 user_qid_dic = eval(line)
 
                 question_list = getQidSubj(
+                    mode=1,
                     table='question_simhash_20171111',
                     question_id=list(user_qid_dic.values())[0]
                 )
