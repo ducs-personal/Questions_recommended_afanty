@@ -5,13 +5,17 @@ import numpy as np
 import time
 import logging
 from lib.table_data import tableToJson, getQuestionId
-from lib.util import getProvinceSet,mkdir
 import pandas as pd
 import csv
 import json
 from operator import itemgetter
 from running.Recom_data_run.recom_fpg_run import getRecomFPGth
 from multiprocessing import Pool
+from lib.util import (
+    mkdir,
+    getRecomFPGth,
+    getProvinceSet
+)
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 RECOMMEND = _DIR + '/new_database/Recommend/'
