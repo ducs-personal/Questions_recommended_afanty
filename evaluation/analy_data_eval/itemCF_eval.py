@@ -99,10 +99,10 @@ if __name__ == '__main__':
     datetimes = {'09-11'}
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
-    # prov_set = getProvinceSet()
+    prov_set = getProvinceSet()
     subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
     # subj_set = {'2'}
-    prov_set = {'福建'}
+    # prov_set = {'福建'}
 
     pool = Pool(3)
     for datetime in datetimes:
