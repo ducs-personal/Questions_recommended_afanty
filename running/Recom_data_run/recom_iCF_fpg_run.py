@@ -65,7 +65,7 @@ def readAnaFpg(ana_fpg, vs, recom_set_fpg):
         while True:
             result = recom_file.readline()
             if result:
-                recom_set_fpg.add(getRecomFPGth(result.replace('\n', '').split('--'), set(vs)))
+                recom_set_fpg |= getRecomFPGth(result.replace('\n', '').split('--'), set(vs), k=1)
 
             else:
                 break
