@@ -37,3 +37,21 @@ def mkdir(path):
     isExitPath = os.path.exists(path)
     if not isExitPath:
         os.makedirs(path)
+
+
+#获取推荐question_id
+def getRecomFPGth(fpg_list, subkp_set, k):
+    subkp_set = set([])
+    flag = 0
+    for fpg in fpg_list:
+        if fpg not in subkp_set:
+            flag += 1
+            subkp_set.add(fpg)
+        else:
+            flag += 0
+
+    if 0 < flag <= k:
+        return subkp_set
+    else:
+        return set([])
+
