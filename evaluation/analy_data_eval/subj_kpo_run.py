@@ -9,7 +9,7 @@ import json
 from multiprocessing import Pool
 from data_mining.FPGrowth import fpGrowth
 from lib.util import getProvinceSet,mkdir
-from lib.table_evaluat import getSubjKpoint
+from lib.table_evaluat import evalSubKpo
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 DATABASE = _DIR + '/new_database/Input/'
@@ -30,9 +30,10 @@ def packSubjKpo(prov,  PATH, datetime):
             while True:
                 line = pre_file.readline()
                 if line:
-                    question_list = getSubjKpoint(
-                        table='question_simhash_20171111',
-                        question_id=list(eval(line).values())[0]
+                    question_list = evalSubKpo(
+                        mode=0,
+                        data=list(eval(line).values())[0],
+                        table='question_simhash_20171111'
                     )
 
                     if len(question_list) > 1:
