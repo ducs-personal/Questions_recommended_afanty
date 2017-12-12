@@ -5,10 +5,14 @@ import numpy as np
 import time
 import logging
 from lib.table_data import tableToJson, getQuestionId
-from lib.util import getProvinceSet,mkdir
 import pandas as pd
 import csv
 import json
+from lib.util import (
+    mkdir,
+    getRecomFPGth,
+    getProvinceSet
+)
 
 LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
@@ -20,22 +24,6 @@ RECOM_FPGTH_PATH = RECOMMEND + 'FPGrowth/'
 
 fpgth_output_file = 'fp_growth_{}_{}_{}.txt'
 output_file = 'fp_output_{}_{}.csv'
-
-
-#获取推荐question_id
-def getRecomFPGth(fpg_list, subkp_set):
-    subkp_str = ''
-    flag = 0
-    for fpg in fpg_list:
-        if fpg in subkp_set:
-            flag += 1
-            subkp_str += fpg
-        else:
-            flag += 0
-
-    if flag == 1:
-        return subkp_str
-
 
 def packageRcomFPGth(req_user, datetime, diff):
     ''' 对推荐试题结果程序进行封装打包
