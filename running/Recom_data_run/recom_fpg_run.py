@@ -72,7 +72,7 @@ def packageRcomFPGth(req_user, datetime, diff):
                             while True:
                                 result = recom_file.readline()
                                 if result:
-                                    recom_set.add(getRecomFPGth(result.replace('\n','').split('--'), set(vs)))
+                                    recom_set |= getRecomFPGth(result.replace('\n','').split('--'), set(vs), k=1)
 
                                 else:
                                     break
