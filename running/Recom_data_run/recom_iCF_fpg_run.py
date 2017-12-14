@@ -131,33 +131,36 @@ def packageRcomItemCF(req_user, diff, datetime):
                     itemcf_file = ITEMCF_PATH + datetime + '/' + prov + '/' + itemCF_file.format(prov,ks, datetime)
                     fpg_file = FPGTH_PATH + datetime + '/' + prov + '/' + fpgth_output_file.format(prov,ks,datetime)
 
-                    if os.path.exists(itemcf_file) or os.path.exists(fpg_file):
-                        recom_set_itemCF = set([])
-                        recom_set_fpg = set([])
+                    if os.path.exists(itemcf_file):
+                        if os.path.exists(fpg_file):
+                            recom_set_itemCF = set([])
+                            recom_set_fpg = set([])
 
-                        recom_set_itemCF = readAnaICF(itemcf_file, vs, recom_set_itemCF)
-                        recom_set_fpg = readAnaFpg(fpg_file, vs, recom_set_fpg)
+                            recom_set_itemCF = readAnaICF(itemcf_file, vs, recom_set_itemCF)
+                            recom_set_fpg = readAnaFpg(fpg_file, vs, recom_set_fpg)
 
-                        recom_set = getRecomSet(recom_set_itemCF,recom_set_fpg, recom_set, vs)
+                            recom_set = getRecomSet(recom_set_itemCF,recom_set_fpg, recom_set, vs)
 
-                        # print(user_id, recom_set)
-                        recom_list = getQuestionId(
-                            table='question_simhash_20171111',
-                            question_id=question_id,
-                            recom_set=recom_set,
-                            diff=diff
-                        )
-                        # print(user_id, recom_list)
+                            recom_list = getQuestionId(
+                                table='question_simhash_20171111',
+                                question_id=question_id,
+                                recom_set=recom_set,
+                                diff=diff
+                            )
 
-                        with open(filename, 'a') as csvfile:
-                            writer = csv.writer(csvfile)
-                            writer.writerow([user_id, ks, recom_list])
+                            with open(filename, 'a') as csvfile:
+                                writer = csv.writer(csvfile)
+                                writer.writerow([user_id, ks, recom_list])
 
-                        logging.info("已经解析完用户{}！".format(user_id))
+                            logging.info("已经解析完用户{}！".format(user_id))
+
+                        else:
+                            logging.error(
+                                "用户{0}在年级科目{1}下没有查询该文件:{2}".format(user_id, ks, fpg_file))
 
                     else:
                         logging.error(
-                            "用户{0}在年级科目{1}下没有查询到ItemCF和FPGrowth输出表".format(user_id, ks))
+                            "用户{0}在年级科目{1}下没有查询该文件:{2}".format(user_id, ks, itemcf_file))
 
             else:
                 logging.error(
