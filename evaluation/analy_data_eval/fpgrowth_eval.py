@@ -6,14 +6,12 @@ import logging
 import pandas as pd
 import numpy as np
 import json
+import platform
+from optparse import OptionParser
 from multiprocessing import Pool
 from data_mining.FPGrowth import fpGrowth
 from lib.util import getProvinceSet,mkdir
-# from running.analy_data_run.fpgrowth_run import (
-#     bigFreqItems,
-#     smallFreqItems,
-#     middleFreqItems
-# )
+
 
 _DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\','/')
 EVALUATE = _DIR + '/new_database/Evaluate/'
@@ -132,9 +130,25 @@ def packageFPGrowthEval(prov, subj, datetime, FO_PATH):
 
             ps_file.close()
 
+    else:
+        logging.error("该路径{0}下没有找到文件！".format(exist_file))
+
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
+    if 'Windows' in platform.system():
+        datetimes = {'09-11'}
+        pool = Pool(2)
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        (options, args) = optparser.parse_args()
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        pool = Pool(4)
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
@@ -142,7 +156,6 @@ if __name__ == '__main__':
     subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)} | {
     '52', '62'}
 
-    pool = Pool(2)
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
                             filename='working/Eval_fpgrowth_{}.log'.format(datetime), filemode='a')
