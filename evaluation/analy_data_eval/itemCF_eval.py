@@ -7,6 +7,8 @@ import pandas as pd
 import numpy as np
 import json
 import math
+import platform
+from optparse import OptionParser
 from simhash import Simhash
 from collections import Counter
 from operator import itemgetter
@@ -96,7 +98,20 @@ def packItemCFEval(prov, subj, datetime, ICF_PATH):
 
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
+    if 'Windows' in platform.system():
+        datetimes = {'09-11'}
+        pool = Pool(2)
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        (options, args) = optparser.parse_args()
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        pool = Pool(4)
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
@@ -104,7 +119,6 @@ if __name__ == '__main__':
     # subj_set = {'2'}
     # prov_set = {'福建'}
 
-    pool = Pool(3)
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
                             filename='working/itemCF_Eval_{}.log'.format(datetime), filemode='a')
