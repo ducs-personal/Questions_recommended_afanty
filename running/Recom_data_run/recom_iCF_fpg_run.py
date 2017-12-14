@@ -180,11 +180,11 @@ if __name__ == '__main__':
                              dest='input',
                              help='必须是csv格式的文件, 如requir_user.csv',
                              default='requir_user.csv')
-        optparser.add_option('-d', '--datetimes',
+        optparser.add_option('-t', '--datetimes',
                              dest='datetimes',
                              help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
                              default='09-11')
-        optparser.add_option('-s', '--difficulty',
+        optparser.add_option('-d', '--difficulty',
                              dest='diff',
                              help='整数值0,1,2',
                              default=1,
