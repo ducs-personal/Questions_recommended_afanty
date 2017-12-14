@@ -4,6 +4,8 @@ import sys
 import csv
 import json
 import logging
+import platform
+from optparse import OptionParser
 import pandas as pd
 import numpy as np
 from multiprocessing import Pool
@@ -47,7 +49,7 @@ def itemSimilarity(train_dict):
     for user, items_weight in train_dict.items():
         for id1,count1 in items_weight:
             if id1 not in item_count:
-                item_count[id1] = 0
+                item_count[id1] = 0.0
             item_count[id1] += count1
             for id2,count2 in items_weight:
                 if id1 == id2:
@@ -55,7 +57,7 @@ def itemSimilarity(train_dict):
                 if id1 not in item_item_count:
                     item_item_count[id1] = dict()
                 if id2 not in item_item_count[id1]:
-                    item_item_count[id1][id2] = 0
+                    item_item_count[id1][id2] = 0.0
                 item_item_count[id1][id2] += count1 +count2
 
     UserSimi2arr = dict()
@@ -114,9 +116,25 @@ def packageItemCFRun(prov, subj, datetime, ICF_PATH):
 
         logging.info(u"已经解析完{0}省份下{1}学科的数据，并存入到文件里！".format(prov, subj))
 
+    else:
+        logging.error("该{0}路径下没有文件".format(exist_file))
+
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
+    if 'Windows' in platform.system():
+        datetimes = {'09-11'}
+        pool = Pool(2)
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        (options, args) = optparser.parse_args()
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        pool = Pool(4)
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
@@ -124,7 +142,7 @@ if __name__ == '__main__':
     # subj_set = {'7'}
     # prov_set = {'湖北', '辽宁'}
 
-    pool = Pool(3)
+
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
                             filename='working/anoah_Analy_itemCF_{}.log'.format(datetime), filemode='a')
