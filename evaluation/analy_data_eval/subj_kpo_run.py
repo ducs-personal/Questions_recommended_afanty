@@ -6,6 +6,8 @@ import logging
 import pandas as pd
 import numpy as np
 import json
+import platform
+from optparse import OptionParser
 from multiprocessing import Pool
 from data_mining.FPGrowth import fpGrowth
 from lib.util import getProvinceSet,mkdir
@@ -62,13 +64,25 @@ def packSubjKpo(prov,  PATH, datetime):
 
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
+    if 'Windows' in platform.system():
+        datetimes = {'09-11'}
+        pool = Pool(2)
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        (options, args) = optparser.parse_args()
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        pool = Pool(4)
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
     # prov_set = {"全国"}
     subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
-    pool = Pool(3)
 
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
