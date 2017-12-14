@@ -57,7 +57,7 @@ def packRawdeal(datetime, init_file):
 
 if __name__ == '__main__':
     if 'Windows' in platform.system():
-        req_user = 'requir_user.csv'
+        init_file = 'user_if_{}.csv'
         datetimes = {'09-11'}
         pool = Pool(2)
 
@@ -73,12 +73,9 @@ if __name__ == '__main__':
                              default='09-11')
         (options, args) = optparser.parse_args()
 
-        req_user = options.input
+        init_file = options.input
         datetimes = set(options.datetimes.replace(' ','').split(','))
         pool = Pool(4)
-
-    datetimes = {'09-11'}
-    init_file = 'user_if_{}.csv'
 
     for datetime in datetimes:
         pool.apply_async(packRawdeal, kwds={
