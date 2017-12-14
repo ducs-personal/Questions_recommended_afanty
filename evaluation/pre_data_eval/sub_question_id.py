@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import json
 import csv
+from optparse import OptionParser
+import platform
 from multiprocessing import Pool
 from lib.util import mkdir,getProvinceSet
 from lib.table_data import getQidSubj
@@ -22,48 +24,61 @@ user_file =  'user_qid_subj_{}_{}_{}.txt'
 
 
 def packFind_subkp(prov, PATH, subj_set, datetime):
-    with open(PRE_DATA_PATH + datetime + '/' + pre_province_file.format(prov, datetime), 'r',
-              encoding='utf-8') as pre_file:
-        while True:
-            line = pre_file.readline()
-            if line:
-                user_qid_dic = eval(line)
+    exit_file = PRE_DATA_PATH + datetime + '/' + pre_province_file.format(prov, datetime)
+    if os.path.exists(exit_file):
+        with open(exit_file, 'r', encoding='utf-8') as pre_file:
+            while True:
+                line = pre_file.readline()
+                if line:
+                    user_qid_dic = eval(line)
 
-                question_list = getQidSubj(
-                    table='question_simhash_20171111',
-                    question_id=list(user_qid_dic.values())[0]
-                )
+                    question_list = getQidSubj(
+                        table='question_simhash_20171111',
+                        question_id=list(user_qid_dic.values())[0]
+                    )
 
-                if len(question_list) > 0:
-                    for subj in subj_set:
-                        userid = []
-                        for qlist in question_list:
-                            if int(subj) in qlist:
-                                userid.append(qlist)
+                    if len(question_list) > 0:
+                        for subj in subj_set:
+                            userid = []
+                            for qlist in question_list:
+                                if int(subj) in qlist:
+                                    userid.append(qlist)
 
-                        if len(userid) > 0:
-                            with open(PATH + '/' + user_file.format(
-                                    prov, subj, datetime), 'a') as user_sub_file:
+                            if len(userid) > 0:
+                                with open(PATH + '/' + user_file.format(
+                                        prov, subj, datetime), 'a') as user_sub_file:
 
-                                user_sub_file.writelines(json.dumps(
-                                    list(user_qid_dic.keys()) + userid) + '\n')
+                                    user_sub_file.writelines(json.dumps(
+                                        list(user_qid_dic.keys()) + userid) + '\n')
+                else:
+                    break
 
-            else:
-                break
-
-        pre_file.close()
-        user_sub_file.close()
-        logging.info("the prov : {} has been finished !".format(prov))
+            pre_file.close()
+            user_sub_file.close()
+            logging.info("the prov : {} has been finished !".format(prov))
+    else:
+        logging.error("该路径{0}下没有找到文件".format(exit_file))
 
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
+    if 'Windows' in platform.system():
+        datetimes = {'09-11'}
+        pool = Pool(2)
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        (options, args) = optparser.parse_args()
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        pool = Pool(4)
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
-    # subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
-    subj_set = {'2'}
-    pool = Pool(3)
+    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)}
 
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
