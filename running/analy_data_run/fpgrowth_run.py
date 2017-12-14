@@ -2,6 +2,8 @@
 import os
 import sys
 import csv
+import platform
+from optparse import OptionParser
 import logging
 import pandas as pd
 import numpy as np
@@ -121,16 +123,32 @@ def packageFPGrowthRun(prov, subj, datetime, FO_PATH):
             ps_file.close()
         logging.info(u"已经解析完{0}省份下{1}学科的数据，并存入到文件！".format(prov, subj))
 
+    else:
+        logging.error("该{0}路径下没有文件".format(exist_file))
+
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
+    if 'Windows' in platform.system():
+        datetimes = {'09-11'}
+        pool = Pool(2)
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        (options, args) = optparser.parse_args()
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        pool = Pool(4)
 
     LOGGING_FORMAT = '%(asctime)-15s:%(levelname)s: %(message)s'
     prov_set = getProvinceSet()
     # prov_set = {'浙江'}
-    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)} | {'52', '62'}
+    subj_set = {str(j) for j in range(1, 11)} | {str(j) for j in range(21, 31)} | {str(j) for j in range(41, 51)} | {
+    '52', '62'}
 
-    pool = Pool(3)
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
                             filename='working/Analy_fpgrowth_{}.log'.format(datetime), filemode='a')
@@ -148,3 +166,4 @@ if __name__ == '__main__':
 
     pool.close()
     pool.join()
+
