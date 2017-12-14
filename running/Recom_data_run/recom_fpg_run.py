@@ -4,6 +4,8 @@ import sys
 import numpy as np
 import time
 import logging
+import platform
+from optparse import OptionParser
 from lib.table_data import tableToJson, getQuestionId
 import pandas as pd
 import csv
@@ -91,7 +93,7 @@ def packageRcomFPGth(req_user, datetime, diff):
                         logging.info(u"已经解析完用户{}！".format(user_id))
 
                     else:
-                        print(u"没有查询到生成相关的FPGrowth输出表！")
+                        print(u"在该{0}路径下没有查询到相关的FPGrowth输出表！".format(fpg_file))
 
             else:
                 print(u"用户{}传入的question_id在表**question_simhash_20171111**里查询不到！".format(user_id))
@@ -100,9 +102,35 @@ def packageRcomFPGth(req_user, datetime, diff):
 
 
 if __name__ == '__main__':
-    datetimes = {'09-11'}
-    diff = 1
-    req_user = 'requir_user.csv'
+    if 'Windows' in platform.system():
+        req_user = 'requir_user.csv'
+        datetimes = {'09-11'}
+        diff = 1
+
+    elif 'Linux' in platform.system():
+        optparser = OptionParser()
+        optparser.add_option('-f', '--inputfile',
+                             dest='input',
+                             help='必须是csv格式的文件, 如requir_user.csv',
+                             default='requir_user.csv')
+        optparser.add_option('-t', '--datetimes',
+                             dest='datetimes',
+                             help='包含时间区间的集合,若是多个时用 , （英文逗号）分割开',
+                             default='09-11')
+        optparser.add_option('-d', '--difficulty',
+                             dest='diff',
+                             help='整数值0,1,2',
+                             default=1,
+                             type='int')
+
+        (options, args) = optparser.parse_args()
+
+        req_user = options.input
+        if not os.path.exists(USER_PATH + req_user):
+            sys.exit("该路径下{0}下没有{1}文件，请将文件放到上面路径下".format(USER_PATH, req_user))
+
+        datetimes = set(options.datetimes.replace(' ','').split(','))
+        diff = options.diff
 
     for datetime in datetimes:
         logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO,
